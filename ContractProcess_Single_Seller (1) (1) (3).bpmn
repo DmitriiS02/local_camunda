@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_17fleog" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.11.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_17fleog" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.15.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
   <bpmn:process id="Contract_Purchase_Single_25" name="Процесс_Договор_Закупка_ЕП" isExecutable="true">
     <bpmn:extensionElements>
       <camunda:properties>
@@ -355,14 +355,14 @@ execution.setVariable("entityVersion", version);</bpmn:script>
     </bpmn:userTask>
     <bpmn:sequenceFlow id="Flow_0333b0e" sourceRef="Activity_1hea2c9" targetRef="Gateway_1o7fjaj" />
     <bpmn:sequenceFlow id="Flow_0jq6zzj" sourceRef="Gateway_1tjd398" targetRef="Activity_1avg4fw" />
-    <bpmn:exclusiveGateway id="Gateway_1pgpkq1" name="Тип процедуры">
+    <bpmn:exclusiveGateway id="Gateway_1pgpkq1" name="Тип процедуры" default="Flow_1bbbqgq">
       <bpmn:incoming>Flow_195an17</bpmn:incoming>
       <bpmn:outgoing>Flow_1ijh4bl</bpmn:outgoing>
       <bpmn:outgoing>Flow_1bbbqgq</bpmn:outgoing>
       <bpmn:outgoing>Flow_1v9fkot</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_1ijh4bl" name="Бумажная" sourceRef="Gateway_1pgpkq1" targetRef="Gateway_1w92f2d">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${S(document).prop("data").prop("attributes").prop("forma_zakl").prop("form_of_contract").stringValue() == 'Бумажная'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${S(document).prop("data").prop("attributes").prop("place_signature").stringValue() != 'АТП'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_136zpmk" sourceRef="Gateway_1w92f2d" targetRef="Activity_1s28kb9" />
     <bpmn:parallelGateway id="Gateway_1w92f2d">
@@ -406,9 +406,7 @@ execution.setVariable("entityVersion", version);</bpmn:script>
     <bpmn:endEvent id="Event_1aionpj">
       <bpmn:incoming>Flow_0c2e953</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_1bbbqgq" name="Электронная форма (сторонняя ЭТП)" sourceRef="Gateway_1pgpkq1" targetRef="Activity_0otww9t">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${S(document).prop("data").prop("attributes").prop("place_signature").prop("place_of_contract_sign").stringValue() == 'Сторонняя площадка' &amp;&amp; S(document).prop("data").prop("attributes").prop("forma_zakl").prop("form_of_contract").stringValue() == 'Электронная'  }</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1bbbqgq" name="Электронная форма (сторонняя ЭТП)" sourceRef="Gateway_1pgpkq1" targetRef="Activity_0otww9t" />
     <bpmn:userTask id="Activity_0otww9t" name="Направить договор на публикацию и подписание" camunda:formKey="document" camunda:assignee="${initiator}" camunda:dueDate="#{extensions.timeService.calculateDueDateByWorkingHours(0, 2)}">
       <bpmn:documentation>${S(document).prop("data").prop("typeTitle").stringValue()} № ${S(document).prop("data").prop("documentNumber").stringValue()}</bpmn:documentation>
       <bpmn:extensionElements>
@@ -431,7 +429,7 @@ execution.setVariable("entityVersion", version);</bpmn:script>
       <bpmn:outgoing>Flow_1k8joc7</bpmn:outgoing>
     </bpmn:userTask>
     <bpmn:sequenceFlow id="Flow_1v9fkot" name="Электронная форма (АТП)" sourceRef="Gateway_1pgpkq1" targetRef="Activity_18ybrdv">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${S(document).prop("data").prop("attributes").prop("place_signature").prop("place_of_contract_sign").stringValue() == 'АТП' &amp;&amp; S(document).prop("data").prop("attributes").prop("forma_zakl").prop("form_of_contract").stringValue() == 'Электронная'  }</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${S(document).prop("data").prop("attributes").prop("place_signature").stringValue() == 'АТП'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:serviceTask id="Activity_1vlceik" name="Установка статуса &#34;Зарегистрирован&#34;" camunda:delegateExpression="#{restClient}">
       <bpmn:extensionElements>
@@ -595,7 +593,7 @@ execution.setVariable("entityVersion", version);</bpmn:script>
       <bpmndi:BPMNShape id="Gateway_1pgpkq1_di" bpmnElement="Gateway_1pgpkq1" isMarkerVisible="true">
         <dc:Bounds x="2295" y="585" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="2281" y="561" width="78" height="14" />
+          <dc:Bounds x="2282" y="561" width="77" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_01seys6_di" bpmnElement="Gateway_1w92f2d">
@@ -638,17 +636,9 @@ execution.setVariable("entityVersion", version);</bpmn:script>
         <di:waypoint x="188" y="610" />
         <di:waypoint x="230" y="610" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1fva050_di" bpmnElement="Flow_1fva050">
-        <di:waypoint x="330" y="610" />
-        <di:waypoint x="395" y="610" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0x8dmxn_di" bpmnElement="Flow_0x8dmxn">
         <di:waypoint x="445" y="610" />
         <di:waypoint x="625" y="610" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0jq6zzj_di" bpmnElement="Flow_0jq6zzj">
-        <di:waypoint x="420" y="635" />
-        <di:waypoint x="420" y="693" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_03wygxz_di" bpmnElement="Flow_03wygxz">
         <di:waypoint x="420" y="773" />
@@ -679,10 +669,6 @@ execution.setVariable("entityVersion", version);</bpmn:script>
         <di:waypoint x="880" y="585" />
         <di:waypoint x="880" y="543" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1oj8k2f_di" bpmnElement="Flow_1oj8k2f">
-        <di:waypoint x="1385" y="863" />
-        <di:waypoint x="1033" y="863" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_03oiymf_di" bpmnElement="Flow_03oiymf">
         <di:waypoint x="933" y="863" />
         <di:waypoint x="850" y="863" />
@@ -692,17 +678,9 @@ execution.setVariable("entityVersion", version);</bpmn:script>
         <di:waypoint x="650" y="863" />
         <di:waypoint x="650" y="635" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_08slpx0_di" bpmnElement="Flow_08slpx0">
-        <di:waypoint x="1560" y="610" />
-        <di:waypoint x="1590" y="610" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_19gdoln_di" bpmnElement="Flow_19gdoln">
         <di:waypoint x="1690" y="610" />
         <di:waypoint x="1720" y="610" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0333b0e_di" bpmnElement="Flow_0333b0e">
-        <di:waypoint x="1820" y="610" />
-        <di:waypoint x="1925" y="610" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0ceomra_di" bpmnElement="Flow_0ceomra">
         <di:waypoint x="1950" y="635" />
@@ -728,17 +706,13 @@ execution.setVariable("entityVersion", version);</bpmn:script>
         <di:waypoint x="880" y="463" />
         <di:waypoint x="880" y="421" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_11fb33h_di" bpmnElement="Flow_11fb33h">
-        <di:waypoint x="3115" y="610" />
-        <di:waypoint x="3200" y="610" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1klulxm_di" bpmnElement="Flow_1klulxm">
         <di:waypoint x="3300" y="610" />
         <di:waypoint x="3372" y="610" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_04d3uah_di" bpmnElement="Flow_04d3uah">
-        <di:waypoint x="1033" y="610" />
-        <di:waypoint x="1100" y="610" />
+      <bpmndi:BPMNEdge id="Flow_1fva050_di" bpmnElement="Flow_1fva050">
+        <di:waypoint x="330" y="610" />
+        <di:waypoint x="395" y="610" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="BPMNEdge_0dqwhx9" bpmnElement="Flow_1httj5x">
         <di:waypoint x="1200" y="610" />
@@ -748,6 +722,10 @@ execution.setVariable("entityVersion", version);</bpmn:script>
         <di:waypoint x="1340" y="610" />
         <di:waypoint x="1385" y="610" />
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1oj8k2f_di" bpmnElement="Flow_1oj8k2f">
+        <di:waypoint x="1385" y="863" />
+        <di:waypoint x="1033" y="863" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0xr2xav_di" bpmnElement="Flow_0xr2xav">
         <di:waypoint x="1410" y="635" />
         <di:waypoint x="1410" y="838" />
@@ -756,12 +734,52 @@ execution.setVariable("entityVersion", version);</bpmn:script>
         <di:waypoint x="1435" y="610" />
         <di:waypoint x="1460" y="610" />
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_08slpx0_di" bpmnElement="Flow_08slpx0">
+        <di:waypoint x="1560" y="610" />
+        <di:waypoint x="1590" y="610" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_04d3uah_di" bpmnElement="Flow_04d3uah">
+        <di:waypoint x="1033" y="610" />
+        <di:waypoint x="1100" y="610" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0333b0e_di" bpmnElement="Flow_0333b0e">
+        <di:waypoint x="1820" y="610" />
+        <di:waypoint x="1925" y="610" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0jq6zzj_di" bpmnElement="Flow_0jq6zzj">
+        <di:waypoint x="420" y="635" />
+        <di:waypoint x="420" y="693" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1ijh4bl_di" bpmnElement="Flow_1ijh4bl">
         <di:waypoint x="2345" y="610" />
         <di:waypoint x="2435" y="610" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="2365" y="592" width="52" height="14" />
         </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_136zpmk_di" bpmnElement="Flow_136zpmk">
+        <di:waypoint x="2460" y="635" />
+        <di:waypoint x="2460" y="733" />
+        <di:waypoint x="2720" y="733" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0o2ci6k_di" bpmnElement="Flow_0o2ci6k">
+        <di:waypoint x="2820" y="733" />
+        <di:waypoint x="3090" y="733" />
+        <di:waypoint x="3090" y="635" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_11fb33h_di" bpmnElement="Flow_11fb33h">
+        <di:waypoint x="3115" y="610" />
+        <di:waypoint x="3200" y="610" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0o4882l_di" bpmnElement="Flow_0o4882l">
+        <di:waypoint x="2460" y="585" />
+        <di:waypoint x="2460" y="490" />
+        <di:waypoint x="2860" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0w1wa3i_di" bpmnElement="Flow_0w1wa3i">
+        <di:waypoint x="2960" y="490" />
+        <di:waypoint x="3090" y="490" />
+        <di:waypoint x="3090" y="585" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1bbbqgq_di" bpmnElement="Flow_1bbbqgq">
         <di:waypoint x="2320" y="635" />
@@ -771,6 +789,10 @@ execution.setVariable("entityVersion", version);</bpmn:script>
           <dc:Bounds x="2310" y="1079" width="87" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_00czkco_di" bpmnElement="Flow_00czkco">
+        <di:waypoint x="2860" y="913" />
+        <di:waypoint x="3180" y="913" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1v9fkot_di" bpmnElement="Flow_1v9fkot">
         <di:waypoint x="2320" y="585" />
         <di:waypoint x="2320" y="290" />
@@ -779,41 +801,17 @@ execution.setVariable("entityVersion", version);</bpmn:script>
           <dc:Bounds x="2326" y="86" width="67" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_136zpmk_di" bpmnElement="Flow_136zpmk">
-        <di:waypoint x="2460" y="635" />
-        <di:waypoint x="2460" y="733" />
-        <di:waypoint x="2720" y="733" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0o4882l_di" bpmnElement="Flow_0o4882l">
-        <di:waypoint x="2460" y="585" />
-        <di:waypoint x="2460" y="490" />
-        <di:waypoint x="2860" y="490" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0o2ci6k_di" bpmnElement="Flow_0o2ci6k">
-        <di:waypoint x="2820" y="733" />
-        <di:waypoint x="3090" y="733" />
-        <di:waypoint x="3090" y="635" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0w1wa3i_di" bpmnElement="Flow_0w1wa3i">
-        <di:waypoint x="2960" y="490" />
-        <di:waypoint x="3090" y="490" />
-        <di:waypoint x="3090" y="585" />
+      <bpmndi:BPMNEdge id="Flow_0f4l3ga_di" bpmnElement="Flow_0f4l3ga">
+        <di:waypoint x="3260" y="290" />
+        <di:waypoint x="3362" y="290" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0c2e953_di" bpmnElement="Flow_0c2e953">
         <di:waypoint x="3280" y="913" />
         <di:waypoint x="3362" y="913" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_00czkco_di" bpmnElement="Flow_00czkco">
-        <di:waypoint x="2860" y="913" />
-        <di:waypoint x="3180" y="913" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1k8joc7_di" bpmnElement="Flow_1k8joc7">
         <di:waypoint x="2930" y="290" />
         <di:waypoint x="3160" y="290" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0f4l3ga_di" bpmnElement="Flow_0f4l3ga">
-        <di:waypoint x="3260" y="290" />
-        <di:waypoint x="3362" y="290" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
